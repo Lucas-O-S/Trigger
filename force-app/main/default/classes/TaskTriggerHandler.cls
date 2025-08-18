@@ -4,7 +4,7 @@ public with sharing class TaskTriggerHandler  implements TriggerHandler{
 
         Set<Id> relacionados = new Set<Id>();
         for(Task t : Tasks){
-            if(t.WhatId != null && t.WhatId.sObjectType() == Case.sObjectType){
+            if(t.WhatId != null && t.WhatId.getSObjectType() == Case.sObjectType){
                 relacionados.add(t.WhatId);
             }
 
@@ -30,10 +30,10 @@ public with sharing class TaskTriggerHandler  implements TriggerHandler{
 
     }
 
-    public void beforeUpdate(List<SObject> newList, List<SObject> oldList) {
+    public void beforeUpdate(List<SObject> newList, List<SObject> Tasks) {
         Set<Id> relacionados = new Set<Id>();
         for(Task t : Tasks){
-            if(t.WhatId != null && t.WhatId.sObjectType() == Case.sObjectType){
+            if(t.WhatId != null && t.WhatId.getSObjectType() == Case.sObjectType){
                 relacionados.add(t.WhatId);
             }
 
