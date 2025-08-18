@@ -1,18 +1,23 @@
-# Salesforce DX Project: Next Steps
+## E: Time de Suporte e Atendimento ao Cliente
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+### Q: Uma automação na criação de tarefas nos casos de suporte técnico
 
-## How Do You Plan to Deploy Your Changes?
+### P: Não termos mais de uma task aberta ao mesmo tempo para o mesmo caso
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+---
 
-## Configure Your Salesforce DX Project
+### ✅ Ação proposta:
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+Construir uma **trigger** com a seguinte lógica:
 
-## Read All About It
+- Ao criar uma nova tarefa, verificar se já existe **uma tarefa em aberto** associada ao mesmo **objeto Caso**.
+- Se **já houver uma tarefa em aberto**, impedir a criação da nova tarefa e exibir a seguinte **mensagem de erro**:
 
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+  > “Já existe uma tarefa em aberto nesse caso. Encerre-a antes de abrir uma nova.”
+
+- Se **não houver tarefas em aberto**, permitir a criação normalmente.
+
+⚠️ **Importante:** Toda trigger deve funcionar para **cenários de carga de dados (bulk)**, **nunca apenas para um único registro**.
+
+---
+
