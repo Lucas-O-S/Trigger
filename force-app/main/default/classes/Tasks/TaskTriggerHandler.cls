@@ -9,18 +9,19 @@ public with sharing class TaskTriggerHandler  implements TriggerHandler{
             }
 
         }
+        List<String> statusList = new List<String>{'Not Started', 'In Progress', 'Waiting'};
 
         List<Task> repeteds = [
                 select Id, WhatId
                 from Task
                 where WhatId in :related
-                and Status  in ('Not Started', 'In Progress', 'Waiting')
+                and Status in :statusList
             ];
 
         if(repeteds.size() > 0){
             for(Task t : Tasks){
                 for(Task r : repeteds){
-                    if( t.WhatId == r.WhatId ){
+                    if( t.WhatId == r.WhatId && statusList.contains(t.Status) ){
                         t.addError('Já existe uma tarefa relacionada a este registro');
                     }
                 }
