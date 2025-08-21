@@ -1,68 +1,53 @@
-public with sharing class AssociatedLocationTriggerHandler extends TriggerHandler {
-    protected override void beforeInsert() {
-
-        List<AssociatedLocation> newList = (List<AssociatedLocation>) Trigger.new;
-
-
-        Set <Id> userIds = new Set<Id>();
-        Set<Id> accountIds = new Set<Id>();
-        
-        for (AssociatedLocation iAssociatedLocation : newList){
-            userIds.add(iAssociatedLocation.User__c);
-            accountIds.add(iAssociatedLocation.Account__c);
-        }
-
-        List<AssociatedLocation> teamMemberList = [
-            select Id, Account__c, User__c
-            from AssociatedLocation
-            where Account__c in : accountIds
-            and User__c in : userIds
-        ];
-
-        Set<String> pairVerify = new Set<String>();
-        for (AssociatedLocation al : teamMemberList){
-            pairVerify.add(al.Account__c + '-' + al.User__c);
-        }
-
-        try{
-            List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
-            for (AssociatedLocation iAssociatedLocation : newList){
-                String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
-
-                if(pairVerify.contains(temp)){
-                    iAssociatedLocation.addError('Jà existe este usuario nesta empresa');
-            
-                }
-                else{
-                    AccountTeamMember accountTeamMember = new AccountTeamMember( 
-                        AccountId = iAssociatedLocation.Account__c,
-                        UserId = iAssociatedLocation.User__c
-                    );
-                    toInsert.add(accountTeamMember);
-                }
-            }
-            insert toInsert;
-        }
-        catch(Exception e){
-            //TODO: handle exception
-        }
-
-
+public with sharing class AssociatedLocationTriggerHandler {
+    private static Boolean isEnabled;
+    static{
+        isEnabled=true;
     }
 
-     protected override afterInsert(List<SObject> newList){
-
+    public static Boolean IsTriggerEnabled(){
+        return isEnabled;
     }
-    public void beforeUpdate(){
 
+    public static Boolean DisableTrigger(){
+        return isEnabled = false;
     }
-    public void afterUpdate(List<SObject> newList, List<SObject> oldList){
 
+    public static Boolean EnableTrigger(){
+        return isEnabled = true;
     }
-    public void beforeDelete(List<SObject> oldList){
 
-    }
-    public void afterDelete(List<SObject> oldList){
+    List<AssociatedLocation> oldRecordList { get; set; }
+	List<AssociatedLocation> newRecordList { get; set; }
+	Map<Id, AssociatedLocation> oldRecordMap { get; set; }
+	Map<Id, AssociatedLocation> newRecordMap { get; set; }
+    
+    public AssociatedLocationTriggerHandler(
+		List<AssociatedLocation> oldRecordList,
+		List<AssociatedLocation> newRecordList,
+		Map<Id, AssociatedLocation> oldRecordMap,
+		Map<Id, AssociatedLocation> newRecordMap
+	) 
+    {
+		this.oldRecordList = oldRecordList;
+		this.newRecordList = newRecordList;
+		this.oldRecordMap = oldRecordMap;
+		this.newRecordMap = newRecordMap;
+	}
 
+    public void AfterInsert() {
+        AssociatedLocationTriggerHelper.handleInsertAccountTeamMember(newRecordList);
     }
+
+
+    public void AfterUpdate() {
+        // lógica para after update
+    }
+
+
+    public void AfterDelete() {
+        // lógica para after delete
+    }
+
+
 }
+
