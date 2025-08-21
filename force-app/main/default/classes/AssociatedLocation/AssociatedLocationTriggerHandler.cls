@@ -45,7 +45,7 @@ public with sharing class AssociatedLocationTriggerHandler {
 
 
     public void AfterDelete() {
-        // lógica para after delete
+        AssociatedLocationTriggerHelper.handleDeleteTeamMenber(oldRecordList);
     }
 
 
