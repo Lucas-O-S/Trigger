@@ -1,28 +1,28 @@
 public with sharing class AssociatedLocationTriggerHelper {
-   public static void handleInsertAccountTeamMember(List<AssociatedLocation> newList){
+   public static void handleInsertAccountTeamMember(List<AssociatedLocation__c> newList){
 
         Set <Id> userIds = new Set<Id>();
         Set <Id> accountIds = new Set<Id>();
         
-        for (AssociatedLocation iAssociatedLocation : newList){
+        for (AssociatedLocation__c iAssociatedLocation : newList){
             userIds.add(iAssociatedLocation.User__c);
             accountIds.add(iAssociatedLocation.Account__c);
         }
 
-        List<AssociatedLocation> teamMemberList = [
+        List<AssociatedLocation__c> teamMemberList = [
             select Id, Account__c, User__c
-            from AssociatedLocation
+            from AssociatedLocation__c
             where Account__c in : accountIds
             and User__c in : userIds
         ];
 
         Set<String> pairVerify = new Set<String>();
-        for (AssociatedLocation al : teamMemberList){
-            pairVerify.add(al.Account__c + '-' + al.User__c);
+        for (AssociatedLocation__c iAssociatedLocation : teamMemberList){
+            pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
         }
 
             List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
-            for (AssociatedLocation iAssociatedLocation : newList){
+            for (AssociatedLocation__c iAssociatedLocation : newList){
                 String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
 
                 if(pairVerify.contains(temp)){
@@ -40,28 +40,47 @@ public with sharing class AssociatedLocationTriggerHelper {
 
    }
 
-   public static void handleDeleteTeamMenber(List<AssociatedLocation> oldList){
+   public static void handleDeleteTeamMenber(List<AssociatedLocation__c> oldList){
         Set<Id> userIds = new Set<Id>();
         Set<Id> accountIds = new Set<Id>();
         
-        for(AssociatedLocation al : oldList){
-            if(al.User__c != null && al.Account__c != null){
-                userIds.add(al.User__c);
-                accountIds.add(al.Account__c);
+        for(AssociatedLocation__c iAssociatedLocation : oldList){
+            if(iAssociatedLocation.User__c != null && iAssociatedLocation.Account__c != null){
+                userIds.add(iAssociatedLocation.User__c);
+                accountIds.add(iAssociatedLocation.Account__c);
             }
         }
-        
-        List<AccountTeamMember> teamMembersToDelete = [
-            SELECT Id
-            FROM AccountTeamMember
-            WHERE AccountId IN :accountIds
-            AND UserId IN :userIds
-        ];
-        
-        if(!teamMembersToDelete.isEmpty()){
-            delete teamMembersToDelete;
-        }
 
+        List<AccountTeamMember> teamMemberList = [
+            select Id,  AccountId, UserId
+            from AccountTeamMember
+            where AccountId in : accountIds
+            and UserId in : userIds
+        ];
+
+        
+
+    Set<String> pairVerify = new Set<String>();
+    for (AssociatedLocation__c iAssociatedLocation : oldList){
+        pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
+    }
+
+        List<AccountTeamMember> toDelete = new List<AccountTeamMember>();
+        for (AssociatedLocation__c iAccountTeamMember : oldList){
+            String temp = iAccountTeamMember.Account__c + '-' + iAccountTeamMember.User__c;
+
+            if(pairVerify.contains(temp)){
+                AccountTeamMember accountTeamMember = new AccountTeamMember( 
+                    Id = iAccountTeamMember.Id
+                );
+                toDelete.add(accountTeamMember);
+        
+            }
+
+        }
+        Delete toDelete;
+        
+    
 
    }
 }

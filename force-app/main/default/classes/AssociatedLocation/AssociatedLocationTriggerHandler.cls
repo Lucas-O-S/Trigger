@@ -16,16 +16,16 @@ public with sharing class AssociatedLocationTriggerHandler {
         return isEnabled = true;
     }
 
-    List<AssociatedLocation> oldRecordList { get; set; }
-	List<AssociatedLocation> newRecordList { get; set; }
-	Map<Id, AssociatedLocation> oldRecordMap { get; set; }
-	Map<Id, AssociatedLocation> newRecordMap { get; set; }
+    List<AssociatedLocation__c> oldRecordList { get; set; }
+	List<AssociatedLocation__c> newRecordList { get; set; }
+	Map<Id, AssociatedLocation__c> oldRecordMap { get; set; }
+	Map<Id, AssociatedLocation__c> newRecordMap { get; set; }
     
     public AssociatedLocationTriggerHandler(
-		List<AssociatedLocation> oldRecordList,
-		List<AssociatedLocation> newRecordList,
-		Map<Id, AssociatedLocation> oldRecordMap,
-		Map<Id, AssociatedLocation> newRecordMap
+		List<AssociatedLocation__c> oldRecordList,
+		List<AssociatedLocation__c> newRecordList,
+		Map<Id, AssociatedLocation__c> oldRecordMap,
+		Map<Id, AssociatedLocation__c> newRecordMap
 	) 
     {
 		this.oldRecordList = oldRecordList;

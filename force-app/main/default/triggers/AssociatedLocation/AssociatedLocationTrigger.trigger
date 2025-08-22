@@ -1,4 +1,4 @@
-Trigger AssociatedLocationTrigger on AssociatedLocation(after insert ,after update, after delete ){
+Trigger AssociatedLocationTrigger on AssociatedLocation__c(after insert ,after update, after delete ){
     System.debug('AssociatedLocation__c Trigger Start => ' + Trigger.operationType);
 
     AssociatedLocationTriggerHandler handler = new AssociatedLocationTriggerHandler(
