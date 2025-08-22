@@ -1,14 +1,11 @@
 public with sharing class AssociatedLocationTriggerHelper {
-   public static void handleInsertAccountTeamMember(List<AssociatedLocation__c> newList){
 
-        Set <Id> userIds = new Set<Id>();
-        Set <Id> accountIds = new Set<Id>();
+    private static Set <Id> userIds = new Set<Id>();
+    private static Set <Id> accountIds = new Set<Id>();   
+    
+    public static void handleInsertAccountTeamMember(List<AssociatedLocation__c> newList){
         
-        for (AssociatedLocation__c iAssociatedLocation : newList){
-            userIds.add(iAssociatedLocation.User__c);
-            accountIds.add(iAssociatedLocation.Account__c);
-        }
-
+        setIds(newList);
         List<AssociatedLocation__c> teamMemberList = [
             select Id, Account__c, User__c
             from AssociatedLocation__c
@@ -41,15 +38,7 @@ public with sharing class AssociatedLocationTriggerHelper {
    }
 
     public static void handleDeleteTeamMenber(List<AssociatedLocation__c> oldList) {
-        Set<Id> userIds = new Set<Id>();
-        Set<Id> accountIds = new Set<Id>();
-        
-        for (AssociatedLocation__c iAssociatedLocation : oldList) {
-            if (iAssociatedLocation.User__c != null && iAssociatedLocation.Account__c != null) {
-                userIds.add(iAssociatedLocation.User__c);
-                accountIds.add(iAssociatedLocation.Account__c);
-            }
-        }
+        setIds(oldList);
 
         List<AccountTeamMember> teamMemberList = [
             select Id, AccountId, UserId
@@ -82,4 +71,87 @@ public with sharing class AssociatedLocationTriggerHelper {
             delete toDelete;
         }
     }
+
+    public static void handleUpdateTeamMenber(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
+        
+        updateUserFlux(oldList, newList);
+        
+
+
+    }
+
+    public static void updateUserFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
+        List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
+        for(Integer i = 0; i < oldList.size(); i++){
+
+            AssociatedLocation__c oldListNow = oldList[i];
+            AssociatedLocation__c newListNow = newList[i];
+
+            if(newListNow.User__c != oldListNow.User__c){
+                toInsert.add(new AccountTeamMember( 
+                    UserId = newListNow.User__c,
+                    AccountId = newListNow.Account__c
+                ));
+
+            }
+
+        }
+        setIds(oldList);
+
+        //Verifica os que ainda existem
+        List<AssociatedLocation__c> stillAssociatedLocations = [
+            select Account__c, User__c
+            from AssociatedLocation__c
+            where Account__c in :accountIds
+            and User__c in : userIds
+        ];
+
+        List<AssociatedLocation__c> prepareDelete = new List<AssociatedLocation__c>();
+
+        Set<String> pairVerify = new Set<String>();
+        for (AssociatedLocation__c iAssociatedLocation : stillAssociatedLocations){
+            pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
+        }
+        
+
+        for(AssociatedLocation__c iAssociatedLocation : oldList){
+            String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
+            if(!pairVerify.contains(temp) ){
+                prepareDelete.add(iAssociatedLocation);
+            }
+        }
+        setIds(prepareDelete);
+
+
+        List<AccountTeamMember> ToDelete = [
+            select id
+            from AccountTeamMember
+            where UserId in :userIds
+            and AccountId in :accountIds
+        ];
+        insert toInsert;
+        delete ToDelete;
+    }
+
+    public static void updateAccountFlux() {
+
+    }
+
+    //Pega todos os ids de user e account de uma lista do tipo AssociatedLocation__c
+    private static void setIds(List<AssociatedLocation__c> listAL){
+        clearIds();
+        for (AssociatedLocation__c iAssociatedLocation : listAL) {
+            if (iAssociatedLocation.User__c != null && iAssociatedLocation.Account__c != null) {
+                userIds.add(iAssociatedLocation.User__c);
+                accountIds.add(iAssociatedLocation.Account__c);
+            }
+        }
+    }
+    
+
+    private static void clearIds(){
+        userIds.clear();
+        accountIds.clear();
+    }
+
 }

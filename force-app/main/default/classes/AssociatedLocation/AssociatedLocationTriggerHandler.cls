@@ -40,7 +40,7 @@ public with sharing class AssociatedLocationTriggerHandler {
 
 
     public void AfterUpdate() {
-        // lógica para after update
+        AssociatedLocationTriggerHelper.handleUpdateTeamMenber(oldRecordList, newRecordList);
     }
 
 
