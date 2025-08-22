@@ -75,7 +75,7 @@ public with sharing class AssociatedLocationTriggerHelper {
     public static void handleUpdateTeamMenber(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
         
         updateUserFlux(oldList, newList);
-        
+
 
 
     }
@@ -96,6 +96,7 @@ public with sharing class AssociatedLocationTriggerHelper {
             }
 
         }
+
         setIds(oldList);
 
         //Verifica os que ainda existem
@@ -106,23 +107,27 @@ public with sharing class AssociatedLocationTriggerHelper {
             and User__c in : userIds
         ];
 
+        //lista para colocar os LAs associados aqueles ATM que serao deletados
         List<AssociatedLocation__c> prepareDelete = new List<AssociatedLocation__c>();
 
+        //Pares de chaves daqueles que ainda estao na tabela
         Set<String> pairVerify = new Set<String>();
         for (AssociatedLocation__c iAssociatedLocation : stillAssociatedLocations){
             pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
         }
         
 
+        //verifica aquelas combinacoes qeu ainda nao existem 
         for(AssociatedLocation__c iAssociatedLocation : oldList){
             String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
             if(!pairVerify.contains(temp) ){
                 prepareDelete.add(iAssociatedLocation);
             }
         }
+
         setIds(prepareDelete);
 
-
+        //Busca aqueles que devem ser deletados
         List<AccountTeamMember> ToDelete = [
             select id
             from AccountTeamMember
@@ -133,7 +138,54 @@ public with sharing class AssociatedLocationTriggerHelper {
         delete ToDelete;
     }
 
-    public static void updateAccountFlux() {
+    public static void updateAccountFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList) {
+        //Verifica se há 
+        List<AccountTeamMember> toVerifyUser = new List<AccountTeamMember>();
+        
+        //Loop para verificar se houve alterações no account
+        for(Integer i = 0; i < oldList.size(); i++){
+
+            AssociatedLocation__c oldListNow = oldList[i];
+            AssociatedLocation__c newListNow = newList[i];
+
+            if(newListNow.Account__c != oldListNow.Account__c){
+                toVerifyUser.add(new AccountTeamMember( 
+                    UserId = newListNow.User__c,
+                    AccountId = newListNow.Account__c
+                ));
+            }
+        }
+
+        setIds(oldList);
+
+        //Verifica os que ainda existem
+        List<AssociatedLocation__c> stillAssociatedLocations = [
+            select Account__c, User__c
+            from AssociatedLocation__c
+            where Account__c in :accountIds
+            and User__c in : userIds
+        ];
+
+        //Pares de chaves daqueles que ainda estao na tabela
+        Set<String> pairVerify = new Set<String>();
+        for (AssociatedLocation__c iAssociatedLocation : stillAssociatedLocations){
+            pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
+        }
+
+        //cria uma lista para verificar os usuarios que nao possuem mais LA para criar uma nova atm para eles na nova Account
+        List<AssociatedLocation__c> prepareToMove = new List<AssociatedLocation__c>();
+
+        for(AssociatedLocation__c iAssociatedLocation : oldList){
+            String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
+            if(!pairVerify.contains(temp) ){
+                prepareToMove.add(iAssociatedLocation);
+            }
+        }
+        //Peguei 
+
+        //tenho que pegar as chaves para verificar se em toVerifyUser há ATM em outras LAS
+
+        
 
     }
 
@@ -146,6 +198,9 @@ public with sharing class AssociatedLocationTriggerHelper {
                 accountIds.add(iAssociatedLocation.Account__c);
             }
         }
+
+
+
     }
     
 
