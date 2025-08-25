@@ -7,51 +7,49 @@ public with sharing class AssociatedLocationTriggerHelper {
         
         setIds(newList);
         List<AssociatedLocation__c> teamMemberList = [
-            select Id, Account__c, User__c
-            from AssociatedLocation__c
-            where Account__c in : accountIds
-            and User__c in : userIds
+            SELECT Id, Account__c, User__c
+                FROM AssociatedLocation__c
+            WHERE Account__c in : accountIds
+            AND User__c in : userIds
         ];
 
         Set<String> pairVerify = new Set<String>();
+        
         for (AssociatedLocation__c iAssociatedLocation : teamMemberList){
             pairVerify.add(iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c);
         }
 
-            List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
-            for (AssociatedLocation__c iAssociatedLocation : newList){
-                String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
+        List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
 
-                if(pairVerify.contains(temp)){
-                    AccountTeamMember accountTeamMember = new AccountTeamMember( 
-                        AccountId = iAssociatedLocation.Account__c,
-                        UserId = iAssociatedLocation.User__c
-                    );
-                    toInsert.add(accountTeamMember);
-            
-                }
-
+        for (AssociatedLocation__c iAssociatedLocation : newList){
+            String temp = iAssociatedLocation.Account__c + '-' + iAssociatedLocation.User__c;
+            if(pairVerify.contains(temp)){
+                AccountTeamMember accountTeamMember = new AccountTeamMember( 
+                    AccountId = iAssociatedLocation.Account__c,
+                    UserId = iAssociatedLocation.User__c
+                );
+                toInsert.add(accountTeamMember);
+        
             }
-            insert toInsert;
-
-
+        }
+        insert toInsert;
    }
 
     public static void handleDeleteTeamMenber(List<AssociatedLocation__c> oldList) {
         setIds(oldList);
 
         List<AccountTeamMember> teamMemberList = [
-            select Id, AccountId, UserId
-            from AccountTeamMember
-            where AccountId in :accountIds
-            and UserId in :userIds
+            SELECT Id, AccountId, UserId
+            FROM AccountTeamMember
+            WHERE AccountId in :accountIds
+            AND UserId in :userIds
         ];
 
         List<AssociatedLocation__c> stillAssociatedLocations = [
-            select Account__c, User__c
-            from AssociatedLocation__c
-            where Account__c in :accountIds
-            and User__c in :userIds
+            SELECT Account__c, User__c
+            FROM AssociatedLocation__c
+            WHERE Account__c in :accountIds
+            AND User__c in :userIds
         ];
 
         Set<String> existingPairs = new Set<String>();
@@ -225,15 +223,10 @@ public with sharing class AssociatedLocationTriggerHelper {
                 accountIds.add(iAssociatedLocation.Account__c);
             }
         }
-
-
-
     }
     
-
     private static void clearIds(){
         userIds.clear();
         accountIds.clear();
     }
-
 }
