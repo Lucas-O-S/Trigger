@@ -80,7 +80,7 @@ public with sharing class AssociatedLocationTriggerHelper {
 
     }   
 
-    public static void updateUserFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
+    private static void updateUserFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
         List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
         for(Integer i = 0; i < oldList.size(); i++){
 
@@ -148,7 +148,7 @@ public with sharing class AssociatedLocationTriggerHelper {
         insert toInsert;
     }
 
-    public static void updateAccountFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList) {
+    private static void updateAccountFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList) {
         //Verifica se há 
         List<AccountTeamMember> toVerifyUser = new List<AccountTeamMember>();
         
