@@ -8,7 +8,7 @@ public with sharing class AssociatedLocationTriggerHelper {
         setIds(newList);
         List<AssociatedLocation__c> teamMemberList = [
             SELECT Id, Account__c, User__c
-                FROM AssociatedLocation__c
+            FROM AssociatedLocation__c
             WHERE Account__c in : accountIds
             AND User__c in : userIds
         ];
