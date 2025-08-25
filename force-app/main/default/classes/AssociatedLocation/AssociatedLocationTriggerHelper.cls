@@ -75,10 +75,10 @@ public with sharing class AssociatedLocationTriggerHelper {
     public static void handleUpdateTeamMenber(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
         
         updateUserFlux(oldList, newList);
+        updateAccountFlux(oldList, newList);
 
 
-
-    }
+    }   
 
     public static void updateUserFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList){
         List<AccountTeamMember> toInsert = new List<AccountTeamMember>();
@@ -87,6 +87,7 @@ public with sharing class AssociatedLocationTriggerHelper {
             AssociatedLocation__c oldListNow = oldList[i];
             AssociatedLocation__c newListNow = newList[i];
 
+            //Verifica se houve mudança de usuario
             if(newListNow.User__c != oldListNow.User__c){
                 toInsert.add(new AccountTeamMember( 
                     UserId = newListNow.User__c,
@@ -128,14 +129,23 @@ public with sharing class AssociatedLocationTriggerHelper {
         setIds(prepareDelete);
 
         //Busca aqueles que devem ser deletados
-        List<AccountTeamMember> ToDelete = [
+        List<AccountTeamMember> prepareToDelete = [
             select id
             from AccountTeamMember
             where UserId in :userIds
             and AccountId in :accountIds
         ];
-        insert toInsert;
+
+        //verifica se ainda existem em outras contas
+        List<AccountTeamMember> toDelete = new List<AccountTeamMember>();
+        for (AccountTeamMember iAccountTeamMember : prepareToDelete) {
+            String temp = iAccountTeamMember.AccountId + '-' + iAccountTeamMember.UserId;
+            if (!pairVerify.contains(temp)) {
+                toDelete.add(iAccountTeamMember); 
+            }
+        }
         delete ToDelete;
+        insert toInsert;
     }
 
     public static void updateAccountFlux(List<AssociatedLocation__c> oldList, List<AssociatedLocation__c> newList) {
@@ -184,12 +194,21 @@ public with sharing class AssociatedLocationTriggerHelper {
         }
 
         setIds(prepareToMove);
-        List<AccountTeamMember> toDelete = [
+        List<AccountTeamMember> prepareToDelete = [
             select id
             from AccountTeamMember
             where AccountId in :accountIds
             and UserId in : userIds
         ];
+
+        //verifica se ainda existem em outras contas
+        List<AccountTeamMember> toDelete = new List<AccountTeamMember>();
+        for (AccountTeamMember iAccountTeamMember : prepareToDelete) {
+            String temp = iAccountTeamMember.AccountId + '-' + iAccountTeamMember.UserId;
+            if (!pairVerify.contains(temp)) {
+                toDelete.add(iAccountTeamMember); 
+            }
+        }
 
         delete toDelete;
         insert toVerifyUser;
