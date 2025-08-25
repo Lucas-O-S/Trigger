@@ -156,9 +156,10 @@ public with sharing class AssociatedLocationTriggerHelper {
             }
         }
 
+        //Da set nos ids para buscar
         setIds(oldList);
 
-        //Verifica os que ainda existem
+        //Verifica os que ainda existem relacionados aos registros modificados
         List<AssociatedLocation__c> stillAssociatedLocations = [
             select Account__c, User__c
             from AssociatedLocation__c
@@ -181,11 +182,18 @@ public with sharing class AssociatedLocationTriggerHelper {
                 prepareToMove.add(iAssociatedLocation);
             }
         }
-        //Peguei 
 
+        setIds(prepareToMove);
+        List<AccountTeamMember> toDelete = [
+            select id
+            from AccountTeamMember
+            where AccountId in :accountIds
+            and UserId in : userIds
+        ];
+
+        delete toDelete;
+        insert toVerifyUser;
         //tenho que pegar as chaves para verificar se em toVerifyUser há ATM em outras LAS
-
-        
 
     }
 
